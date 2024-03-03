@@ -1,0 +1,225 @@
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  <body>
+    <h1 style="text-align: center">Hello Project Start!</h1>
+    <h2 style="text-align: center">Inventory management App</h2>
+
+    <form action="#" class="form-control" id="form" onsubmit="AddItem(event)">
+      <div class="container text-center p-5" id="container">
+        <div class="row align-items-start">
+          <div class="col">
+            <label for="category">Item Name</label>
+            <select class="form-select" id="category">
+              <option selected>Open this select menu</option>
+              <option value="candy">candy</option>
+              <option value="pasta">pasta</option>
+              <option value="cockokola">cockokola</option>
+            </select>
+          </div>
+
+          <div class="col">
+            <label for="desc">Description</label>
+            <input type="text" id="desc" placeholder="Description" />
+          </div>
+
+          <div class="col">
+            <label for="number">Quantity</label>
+            <input type="number" id="number" placeholder="Add Quantity" />
+          </div>
+
+          <div class="col">
+            <label for="price">price</label>
+            <input type="text" name="price" id="price" placeholder="Price" />
+          </div>
+
+          <label for="btn">Add the Item</label>
+          <button class="col form-control bg-success" id="btn">Add Item</button>
+        </div>
+      </div>
+    </form>
+
+    <table class="table table-bordered" id="inventoryTable">
+      <thead>
+        <tr>
+          <th id="name">Item Name</th>
+          <th id="desc">Description</th>
+          <th id="quant">Quantity</th>
+          <th id="rs">Price</th>
+          <th id="buttons">ManageBtns</th>
+        </tr>
+      </thead>
+    </table>
+
+    <script>
+      //before code use the crudtocrud api put inside the code
+      //use async-await because it will remove .then(callbacks) and use async and await because it 
+      //provides redable code inside the function await keyword return response to hold the res variable in short 
+      //and handle the error try block it  will {}
+
+      function AddItem(event) {
+        event.preventDefault();
+
+        let category_table = document.getElementById("category").value;
+        let description = document.getElementById("desc").value;
+        let Quantity = document.getElementById("number").value;
+        let price = document.getElementById("price").value;
+
+        let Data = {
+          category_table,
+          description,
+          Quantity,
+          price,
+        };
+
+        AddDataItem(Data);
+
+      async function AddDataItem(Data) {
+      try{    
+          let res = await axios.post("https://crudcrud.com/api/86f7b8d7c8544afaac0edc99db04e474/data",Data)
+            ShowAddedData(res.data) //it will resolve when await get response otherwise it will throw the error
+            //it function will pass as an argument into the res.data when res will sucess fully resolve when post request res
+          } 
+         catch(err) {
+             console.log(err) //it handle the error
+          }
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", async() => {
+          try{
+            let res = await axios.get("https://crudcrud.com/api/86f7b8d7c8544afaac0edc99db04e474/data")
+             
+            for (let i = 0; i < res.data.length; i++) {
+                  ShowAddedData(res.data[i]);
+                }
+            }
+              catch(err){
+                console.log(err)
+              }
+          });
+
+      function ShowAddedData(obj) {
+          let newRow = document.createElement("tr");
+
+          let categoryCell = document.createElement("td");
+          categoryCell.textContent = obj.category_table;
+          newRow.appendChild(categoryCell);
+
+          let descriptionCell = document.createElement("td");           
+          descriptionCell.textContent = obj.description;
+          newRow.appendChild(descriptionCell);
+
+          let quantityCell = document.createElement("td");
+          quantityCell.textContent = obj.Quantity;
+          newRow.appendChild(quantityCell);
+
+          let priceCell = document.createElement("td");
+          priceCell.textContent = obj.price;
+          newRow.appendChild(priceCell);
+
+          let table = document.getElementById("inventoryTable");
+          table.appendChild(newRow);
+
+          let deleteButton = document.createElement("button");
+          deleteButton.textContent = "Delete";
+          deleteButton.className = " btn btn-danger btn-sm  delete";
+          deleteButton.onclick = function () {
+            deleteData(obj._id);
+            newRow.remove();
+          };
+          newRow.appendChild(deleteButton);
+         
+          let buy1Button = document.createElement("button");
+          buy1Button.textContent = "Buy 1";
+          buy1Button.className = "btn btn-primary btn-sm  Buy 1";
+
+          buy1Button.onclick = function () {
+            // when click Decrease quantity by 1
+            obj.Quantity = parseInt(obj.Quantity) - 1;
+            console.log("decrease by 1", obj.Quantity);
+            PUtData(obj._id, obj.category_table, obj.description, obj.Quantity, obj.price);
+            quantityCell.textContent = obj.Quantity;
+          };
+          newRow.appendChild(buy1Button);
+          
+          
+          let buy2Button = document.createElement("button");
+          buy2Button.textContent = "Buy 2";
+          buy2Button.className = "btn btn-success btn-sm  Buy 2";
+
+          buy2Button.onclick = function () {
+            // when click Increase quantity by 1
+            obj.Quantity = parseInt(obj.Quantity) - 2 ;
+            console.log("decrease by 2", obj.Quantity);
+            PUtData(obj._id, obj.category_table, obj.description, obj.Quantity, obj.price);
+            quantityCell.textContent = obj.Quantity;
+          };
+          newRow.appendChild(buy2Button);
+
+          let buy3Button = document.createElement("button");
+          buy3Button.textContent = "Buy 3";
+          buy3Button.className = "btn btn-success btn-sm  Buy 3";
+
+          buy3Button.onclick = function () {
+            // when click decrease quantity by 3
+            obj.Quantity = parseInt(obj.Quantity) - 3;
+            console.log("decrease by 3", obj.Quantity);
+            PUtData(obj._id, obj.category_table, obj.description, obj.Quantity, obj.price);
+            quantityCell.textContent = obj.Quantity;
+          };
+          newRow.appendChild(buy3Button);
+        }
+
+
+      async function deleteData(UserId) {
+       try{
+        let res = await axios.delete("https://crudcrud.com/api/86f7b8d7c8544afaac0edc99db04e474/data${UserId}")
+          console.log('dellete object',UserId)
+        }
+        catch(err){
+          console.log(err)
+        }
+      }
+
+      async function PUtData(UserId, category_table, description, updatedQuantity, updatedPrice) {
+      try{       
+        let res = await axios.put("https://crudcrud.com/api/86f7b8d7c8544afaac0edc99db04e474/data${UserId}", 
+            {
+              category_table: category_table,
+              description: description,
+              Quantity: updatedQuantity,
+              price: updatedPrice,
+            })
+             console.log('updated object',res)
+          }
+          catch(err){
+            console.log(err) 
+          }
+      }
+
+    </script>
+  </body>
+</html>
